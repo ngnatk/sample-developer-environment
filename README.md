@@ -35,8 +35,9 @@ This solution deploys a complete browser-based development environment with VS C
 1. Launch the AWS CloudFormation template `sample-developer-environment.yml`
 2. Access VS Code through the provided CloudFormation output URL
 3. Get your password from AWS Secrets Manager (link in outputs)
-4. Start developing in the `dev` directory
-5. Push tested code to `release` to trigger automated deployment
+4. Click *File* > *Open Folder* and navigate to `/home/ec2-user/my-workspace`. This is the git-initialized project directory
+5. Start developing in the `dev` directory
+6. Push tested code to `release` to trigger automated deployment
 
 
 ## Configuration Options

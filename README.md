@@ -6,16 +6,16 @@ This solution deploys a complete browser-based development environment with VS C
 
 ```
 .
-├── dev/                        # Development workspace
-│   └── README.md               # Development guide
-├── release/                    # Sample Terraform application
-│   ├── main.tf                 # Core infrastructure
-│   ├── provider.tf             # AWS provider configuration
-│   ├── variables.tf            # Input variables
-│   ├── versions.tf             # Provider versions and backend
-│   ├── website.tf              # Sample static website
-│   └── terraform.tfvars        # Variable defaults
-└── secure-dev-environment.yml  # Main CloudFormation template
+├── dev/                              # Development workspace
+│   └── README.md                     # Development guide
+├── release/                          # Sample Terraform application
+│   ├── main.tf                       # Core infrastructure
+│   ├── provider.tf                   # AWS provider configuration
+│   ├── variables.tf                  # Input variables
+│   ├── versions.tf                   # Provider versions and backend
+│   ├── website.tf                    # Sample static website
+│   └── terraform.tfvars              # Variable defaults
+└── sample-developer-environment.yml  # Main CloudFormation template
 ```
 
 ## Key Features
@@ -32,7 +32,7 @@ This solution deploys a complete browser-based development environment with VS C
 
 ## Quick Start
 
-1. Launch the AWS CloudFormation template `secure-dev-environment.yml`
+1. Launch the AWS CloudFormation template `sample-developer-environment.yml`
 2. Access VS Code through the provided CloudFormation output URL
 3. Get your password from AWS Secrets Manager (link in outputs)
 4. Start developing in the `dev` directory
@@ -74,7 +74,7 @@ The application deploys automatically when you set the CloudFormation parameter 
 - Update ALB listener and target group to use HTTPS/443
 - Use a custom domain name with AWS Certificate Manager (ACM) certificates
 
-See [line 670](secure-dev-environment.yml#L670) in the CloudFormation template for more details on this design decision and implementation guidance.
+See [line 670](sample-developer-environment.yml#L670) in the CloudFormation template for more details on this design decision and implementation guidance.
 
 
 

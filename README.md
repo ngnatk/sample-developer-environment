@@ -1,7 +1,5 @@
 # sample-developer-environment
 
-THIS REPO IS NOW PUBLIC: https://github.com/aws-samples/sample-developer-environment
-
 This solution deploys a complete browser-based development environment with VS Code, version control, and automated deployments using a single AWS CloudFormation template.
 
 ## Repository Structure

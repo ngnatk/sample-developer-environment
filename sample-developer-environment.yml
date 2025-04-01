@@ -1224,6 +1224,9 @@ Resources:
 
           echo "INFO: Installing Docker..."
           dnf install -y docker
+          systemctl start docker
+          systemctl enable docker
+          usermod -aG docker ec2-user
 
           echo "INFO: Installing extensions..."
           su - ec2-user -c "code-server --install-extension amazonwebservices.amazon-q-vscode --force"

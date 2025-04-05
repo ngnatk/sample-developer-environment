@@ -1020,6 +1020,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - ec2:DescribeInstances
+                  - ec2:DescribeTags
                 Resource: "*"
                 Condition:
                   StringEquals:
@@ -1041,12 +1042,12 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                   - logs:DescribeLogStreams
                 Resource:
-                  - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/ec2/*
+                  - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/code-server/${PrefixCode}
+                  - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/code-server/${PrefixCode}:*
         - PolicyName: !Sub ${PrefixCode}-iampolicy-codeserver-KMS
           PolicyDocument:
             Version: 2012-10-17
@@ -1081,6 +1082,14 @@ Resources:
               - Effect: Allow
                 Action: s3:ListBucket
                 Resource: !Sub arn:${AWS::Partition}:s3:::${s3bucketgit}
+        - PolicyName: !Sub ${PrefixCode}-iampolicy-codeserver-SSM
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                Resource: !Sub arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${PrefixCode}/config/AmazonCloudWatch-linux
       Tags:
         - Key: Name
           Value: !Sub ${PrefixCode}-iamrole-codeserver
@@ -1119,6 +1128,50 @@ Resources:
           Value: security
         - Key: environment
           Value: !Sub ${EnvironmentTag}
+  ec2loggroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/code-server/${PrefixCode}
+      RetentionInDays: 14
+      Tags:
+        - Key: Name
+          Value: !Sub ${PrefixCode}-ec2loggroup
+        - Key: provisioner
+          Value: CFN
+        - Key: solution
+          Value: !Sub ${SolutionTag}
+        - Key: resourcetype
+          Value: monitoring
+        - Key: environment
+          Value: !Sub ${EnvironmentTag}
+  ssmparametercloudwatchlinux:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub /${PrefixCode}/config/AmazonCloudWatch-linux
+      Type: String
+      Value: !Sub |
+        {
+          "logs": {
+            "logs_collected": {
+              "files": {
+                "collect_list": [
+                  {
+                    "file_path": "/var/log/cloud-init-output.log",
+                    "log_group_name": "/aws/code-server/${PrefixCode}",
+                    "log_stream_name": "setup"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      Description: CloudWatch Agent configuration for linux instances
+      Tags:
+        Name: !Sub ${PrefixCode}-ssm-cloudwatch-linux
+        provisioner: CFN
+        solution: !Sub ${SolutionTag}
+        resourcetype: monitoring
+        environment: !Sub ${EnvironmentTag}
   ec2codeserver:
     Type: AWS::EC2::Instance
     Properties:
@@ -1156,7 +1209,12 @@ Resources:
           dnf install amazon-cloudwatch-agent -y -q
 
           echo "INFO: Configuring CloudWatch agent..."
-          /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s -c ssm:/AmazonCloudWatch-linux -c default
+          until aws ssm get-parameter --name /${PrefixCode}/config/AmazonCloudWatch-linux --region ${AWS::Region} &> /dev/null; do
+            echo "INFO: SSM parameter is not ready..."
+            sleep 5
+          done
+          aws ssm get-parameter --name /${PrefixCode}/config/AmazonCloudWatch-linux --region ${AWS::Region} --query "Parameter.Value" --output text > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+          /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s
 
           echo "INFO: Creating AWS profile for developer role..."
           su - ec2-user -c "mkdir -p ~/.aws"

@@ -52,7 +52,7 @@ Parameters:
     Description: Rotate code-server secret every 30 days.
   CodeServerVersion:
     Type: String
-    Default: "4.97.2"
+    Default: "4.98.2"
     Description: Version of code-server to install. See available versions at github.com/coder/code-server/releases
   InstanceArchitecture:
     Type: String

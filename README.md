@@ -38,7 +38,7 @@ This solution deploys a complete browser-based development environment with VS C
    - Provide an S3 bucket name in `S3AssetBucket` parameter
 3. Access VS Code through the provided CloudFormation output URL
 4. Get your password from AWS Secrets Manager (link in outputs)
-5. Click *File* > *Open Folder* and navigate to `/home/ec2-user/my-workspace`. This is the git-initialized project directory
+5. Click *File* > *Open Folder* and navigate to `/home/ec2-user/my-workspace`. This is the git/S3 initialized project directory
 6. Start developing in the `dev` directory
 7. Copy tested code to `release` to trigger automated deployment
 
@@ -60,7 +60,7 @@ The environment runs in a private subnet with CloudFront access, using S3 for gi
 
 ## Sample Application
 
-ℹ️ **Note**: The sample application is only available when using the default value for `GitHubRepo`. If you specify either a custom `GitHubRepo` or `S3AssetBucket`, you will need to provide your own application code.
+ℹ️ **Note**: The sample application is only available when using the default value for `GitHubRepo`. If you specify either a custom `GitHubRepo` or `S3AssetBucket`, you will need to provide your own Terraform application code.
 
 The repository includes a Terraform application that deploys:
 - Static website hosted on Amazon S3
@@ -74,7 +74,12 @@ The application deploys automatically when you set the CloudFormation parameter 
 
 ![CodeBuild Output Screenshot](img/codebuildoutput.png)
 
-⚠️ **WARNING**: Before removing the CloudFormation stack, ensure you run the destroy pipeline first. Failing to do so will leave orphaned resources in your AWS account that will need to be cleaned up manually.
+⚠️ **WARNING**: If using CodePipeline (DeployPipeline=true), before removing the CloudFormation stack:
+1. Run the 'terraform-destroy' pipeline in CodePipeline
+2. Approve the manual approval step when prompted
+3. Wait for pipeline completion
+
+Failing to run and approve the destroy pipeline will leave orphaned infrastructure resources in your AWS account that were created by Terraform and will need to be cleaned up manually.
 
 ## Security Considerations
 

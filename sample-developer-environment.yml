@@ -12,6 +12,7 @@ Metadata:
         Parameters:
           - CodeServerVersion
           - GitHubRepo
+          - S3AssetBucket
           - DeployPipeline
           - RotateSecret
       - Label:
@@ -36,6 +37,10 @@ Parameters:
     Type: String
     Default: https://github.com/aws-samples/sample-developer-environment.git
     Description: GitHub repository URL to clone as initial workspace content for code-server
+  S3AssetBucket:
+    Type: String
+    Default: ""
+    Description: (Optional) S3 path for initial workspace content in format 'my-bucket-name'. If provided, this OVERWRITES GitHubRepo parameter and copies ALL bucket contents.
   DeployPipeline:
     Type: String
     Default: false
@@ -146,6 +151,8 @@ Conditions:
   CreatePipeline: !Equals [!Ref DeployPipeline, "true"]
   EnableRotation: !Equals [!Ref RotateSecret, "true"]
   IsArm64: !Equals [!Ref InstanceArchitecture, 'arm64']
+  HasS3Assets: !Not [!Equals [!Ref S3AssetBucket, ""]]
+
 
 Resources:
   ### Resource Group - Groups all AWS resources for easy management and tracking
@@ -1181,7 +1188,7 @@ Resources:
       SubnetId: !Ref subnetprivate01
       IamInstanceProfile: !Ref iaminstanceprofilecodeserver
       Monitoring: true
-      PrivateIpAddress: !Sub ${VpcCidr}.3.101
+      PrivateIpAddress: !Sub ${VpcCidr}.3.100
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
@@ -1309,12 +1316,27 @@ Resources:
           su - ec2-user -c "git config --global user.name 'EC2 User'"
           su - ec2-user -c "git config --global user.email 'ec2-user@example.com'"
           su - ec2-user -c "git config --global init.defaultBranch main"
-          su - ec2-user -c "cd /home/ec2-user/workspace && \
-                            git clone ${GitHubRepo} my-workspace && \
-                            cd my-workspace && \
-                            git remote remove origin && \
-                            git remote add origin s3+zip://${s3bucketgit}/my-workspace && \
-                            git push -u origin main"
+
+          # Initialize from either S3 or GitHub
+          if [ -n "${S3AssetBucket}" ]; then
+            echo "INFO: Initializing from S3 assets..."
+            su - ec2-user -c "mkdir -p /home/ec2-user/workspace/my-workspace && \
+                              cd /home/ec2-user/workspace/my-workspace && \
+                              aws s3 cp --recursive s3://${S3AssetBucket}/ ./ && \
+                              git init && \
+                              git add . && \
+                              git commit -m 'Initial commit from S3 assets' && \
+                              git remote add origin s3+zip://${s3bucketgit}/my-workspace && \
+                              git push -u origin main"
+          else
+            echo "INFO: Cloning from GitHub..."
+            su - ec2-user -c "cd /home/ec2-user/workspace && \
+                              git clone ${GitHubRepo} my-workspace && \
+                              cd my-workspace && \
+                              git remote remove origin && \
+                              git remote add origin s3+zip://${s3bucketgit}/my-workspace && \
+                              git push -u origin main"
+          fi
           #### END: GIT-REMOTE-S3 BOOTSTRAP ####
       Tags:
         - Key: Name
@@ -1477,6 +1499,23 @@ Resources:
             Resource: !GetAtt iamroledeveloper.Arn
       Roles:
         - !Ref iamrolecodeserver
+  # Policy allowing code-server to copy files from source S3 bucket for workspace initialization
+  iampolicyS3Assets:
+    Type: AWS::IAM::RolePolicy
+    Condition: HasS3Assets
+    Properties:
+      RoleName: !Ref iamrolecodeserver
+      PolicyName: !Sub ${PrefixCode}-iampolicy-s3-assets
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:ListBucket
+              - s3:GetObject
+            Resource: 
+              - !Sub arn:${AWS::Partition}:s3:::${S3AssetBucket}/*
+              - !Sub arn:${AWS::Partition}:s3:::${S3AssetBucket}
 
   ### CI/CD - CodeBuild and CodePipeline for automated infrastructure deployment via Terraform
   # S3 bucket for codepipeline artifacts AND TERRAFORM STATE!

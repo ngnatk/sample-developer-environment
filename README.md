@@ -33,18 +33,22 @@ This solution deploys a complete browser-based development environment with VS C
 ## Quick Start
 
 1. Launch the AWS CloudFormation template `sample-developer-environment.yml`
-2. Access VS Code through the provided CloudFormation output URL
-3. Get your password from AWS Secrets Manager (link in outputs)
-4. Click *File* > *Open Folder* and navigate to `/home/ec2-user/my-workspace`. This is the git-initialized project directory
-5. Start developing in the `dev` directory
-6. Push tested code to `release` to trigger automated deployment
+2. Choose your initial workspace content:
+   - Provide a GitHub repository URL in `GitHubRepo` parameter, OR
+   - Provide an S3 bucket name in `S3AssetBucket` parameter
+3. Access VS Code through the provided CloudFormation output URL
+4. Get your password from AWS Secrets Manager (link in outputs)
+5. Click *File* > *Open Folder* and navigate to `/home/ec2-user/my-workspace`. This is the git-initialized project directory
+6. Start developing in the `dev` directory
+7. Copy tested code to `release` to trigger automated deployment
 
 
 ## Configuration Options
 
 - `CodeServerVersion` - Version of code-server to install
-- `GitHubRepo` - Public repository to clone as initial workspace
-- `DeployPipeline` - Enable AWS CodePipeline deployments  
+- `GitHubRepo` - Public repository to clone as initial workspace. Note: Using a custom repository will not include the sample application.
+- `S3AssetBucket` - (Optional) S3 bucket containing initial workspace content. Overwrites GitHubRepo if provided
+- `DeployPipeline` - Enable AWS CodePipeline deployments
 - `RotateSecret` - Enable AWS Secrets Manager rotation
 - `InstanceType` - Supports both ARM and x86 Amazon EC2 instances
 
@@ -55,6 +59,8 @@ The environment runs in a private subnet with CloudFront access, using S3 for gi
 ![Architecture Diagram](img/architecture.png)
 
 ## Sample Application
+
+ℹ️ **Note**: The sample application is only available when using the default value for `GitHubRepo`. If you specify either a custom `GitHubRepo` or `S3AssetBucket`, you will need to provide your own application code.
 
 The repository includes a Terraform application that deploys:
 - Static website hosted on Amazon S3

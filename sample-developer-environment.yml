@@ -1181,7 +1181,7 @@ Resources:
       SubnetId: !Ref subnetprivate01
       IamInstanceProfile: !Ref iaminstanceprofilecodeserver
       Monitoring: true
-      PrivateIpAddress: !Sub ${VpcCidr}.3.100
+      PrivateIpAddress: !Sub ${VpcCidr}.3.101
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:

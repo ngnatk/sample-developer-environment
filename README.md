@@ -66,6 +66,8 @@ The repository includes a Terraform application that deploys:
 
 The application deploys automatically when you set the CloudFormation parameter `DeployPipeline` to true. Once deployment completes, you can locate the website URL in the final output of the CodeBuild job.
 
+![CodeBuild Output Screenshot](img/codebuildoutput.png)
+
 ⚠️ **WARNING**: Before removing the CloudFormation stack, ensure you run the destroy pipeline first. Failing to do so will leave orphaned resources in your AWS account that will need to be cleaned up manually.
 
 ## Security Considerations

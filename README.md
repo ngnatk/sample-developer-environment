@@ -39,8 +39,7 @@ This solution deploys a complete browser-based development environment with VS C
 3. Access VS Code through the provided CloudFormation output URL
 4. Get your password from AWS Secrets Manager (link in outputs)
 5. Click *File* > *Open Folder* and navigate to `/home/ec2-user/my-workspace`. This is the git/S3 initialized project directory
-6. Start developing in the `dev` directory
-7. Copy tested code to `release` to trigger automated deployment
+6. Test code in `dev`, copy to `release`, commit and push to trigger deployment
 
 
 ## Configuration Options
@@ -51,6 +50,18 @@ This solution deploys a complete browser-based development environment with VS C
 - `DeployPipeline` - Enable AWS CodePipeline deployments
 - `RotateSecret` - Enable AWS Secrets Manager rotation
 - `InstanceType` - Supports both ARM and x86 Amazon EC2 instances
+
+## AWS IAM Roles
+
+The environment is configured with two IAM roles:
+1. EC2 instance role - Basic permissions for the instance
+2. Developer role - Elevated permissions for AWS operations
+
+The developer role has the permissions needed to deploy the sample application. To view or modify these permissions, search for "iamroledeveloper" in the CloudFormation template.
+
+This separation ensures the EC2 instance runs with minimal permissions by default, while allowing controlled elevation of privileges when needed.
+
+ℹ️ **Tip**: Run `echo 'export AWS_PROFILE=developer' >> ~/.bashrc && source ~/.bashrc` to make the developer profile default for all terminal sessions.
 
 ## Architecture
 
@@ -87,10 +98,6 @@ Failing to run and approve the destroy pipeline will leave orphaned infrastructu
 - Configure end-to-end HTTPS using custom SSL certificates on the ALB
 - Update ALB listener and target group to use HTTPS/443
 - Use a custom domain name with AWS Certificate Manager (ACM) certificates
-
-See [line 670](sample-developer-environment.yml#L670) in the CloudFormation template for more details on this design decision and implementation guidance.
-
-
 
 ## Security
 

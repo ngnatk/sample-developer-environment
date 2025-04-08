@@ -35,7 +35,7 @@ This solution deploys a complete browser-based development environment with VS C
 1. Launch the AWS CloudFormation template `sample-developer-environment.yml`
 2. Choose your initial workspace content:
    - Provide a GitHub repository URL in `GitHubRepo` parameter, OR
-   - Provide an S3 bucket name in `S3AssetBucket` parameter
+   - Provide S3 bucket name `S3AssetBucket` and `S3AssetPrefix` parameters
 3. Access VS Code through the provided CloudFormation output URL
 4. Get your password from AWS Secrets Manager (link in outputs)
 5. Click *File* > *Open Folder* and navigate to `/home/ec2-user/my-workspace`. This is the git/S3 initialized project directory
@@ -47,6 +47,7 @@ This solution deploys a complete browser-based development environment with VS C
 - `CodeServerVersion` - Version of code-server to install
 - `GitHubRepo` - Public repository to clone as initial workspace. Note: Using a custom repository will not include the sample application.
 - `S3AssetBucket` - (Optional) S3 bucket containing initial workspace content. Overwrites GitHubRepo if provided
+- `S3AssetPrefix` - (Optional) Asset prefix path. Only required when S3AssetBucket is specified.
 - `DeployPipeline` - Enable AWS CodePipeline deployments
 - `RotateSecret` - Enable AWS Secrets Manager rotation
 - `InstanceType` - Supports both ARM and x86 Amazon EC2 instances
@@ -65,7 +66,7 @@ This separation ensures the EC2 instance runs with minimal permissions by defaul
 
 ## Architecture
 
-The environment runs in a private subnet with CloudFront access, using S3 for git storage and automated deployments.
+The environment runs in a private subnet with CloudFront access, using S3 for git storage and CodePipeline for automated deployments.
 
 ![Architecture Diagram](img/architecture.png)
 

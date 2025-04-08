@@ -13,6 +13,7 @@ Metadata:
           - CodeServerVersion
           - GitHubRepo
           - S3AssetBucket
+          - S3AssetPrefix
           - DeployPipeline
           - RotateSecret
       - Label:
@@ -40,7 +41,11 @@ Parameters:
   S3AssetBucket:
     Type: String
     Default: ""
-    Description: (Optional) S3 path for initial workspace content in format 'my-bucket-name'. If provided, this OVERWRITES GitHubRepo parameter and copies ALL bucket contents.
+    Description: (Optional) S3 path for initial workspace content in format 'my-bucket-name'. If provided, this OVERWRITES GitHubRepo parameter.
+  S3AssetPrefix:
+    Type: String
+    Default: ""
+    Description: (Optional) Asset prefix path. Only required when S3AssetBucket is specified.
   DeployPipeline:
     Type: String
     Default: false
@@ -1322,7 +1327,7 @@ Resources:
             echo "INFO: Initializing from S3 assets..."
             su - ec2-user -c "mkdir -p /home/ec2-user/workspace/my-workspace && \
                               cd /home/ec2-user/workspace/my-workspace && \
-                              aws s3 cp --recursive s3://${S3AssetBucket}/ ./ && \
+                              aws s3 cp --recursive s3://${S3AssetBucket}/${S3AssetPrefix} ./ && \
                               git init && \
                               git add . && \
                               git commit -m 'Initial commit from S3 assets' && \
@@ -1513,9 +1518,9 @@ Resources:
             Action:
               - s3:ListBucket
               - s3:GetObject
-            Resource: 
-              - !Sub arn:${AWS::Partition}:s3:::${S3AssetBucket}/*
+            Resource:
               - !Sub arn:${AWS::Partition}:s3:::${S3AssetBucket}
+              - !Sub arn:${AWS::Partition}:s3:::${S3AssetBucket}/${S3AssetPrefix}*
 
   ### CI/CD - CodeBuild and CodePipeline for automated infrastructure deployment via Terraform
   # S3 bucket for codepipeline artifacts AND TERRAFORM STATE!

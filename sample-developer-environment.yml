@@ -16,6 +16,7 @@ Metadata:
           - S3AssetPrefix
           - DeployPipeline
           - RotateSecret
+          - AutoSetDeveloperProfile
       - Label:
           default: Compute settings
         Parameters:
@@ -45,7 +46,7 @@ Parameters:
   S3AssetPrefix:
     Type: String
     Default: ""
-    Description: (Optional) Asset prefix path. Only required when S3AssetBucket is specified.
+    Description: (Optional) Asset prefix path. Only required when S3AssetBucket is specified. Must end in '/' e.g. 'assets/' or 'assets/solution/'
   DeployPipeline:
     Type: String
     Default: false
@@ -60,6 +61,13 @@ Parameters:
       - true
       - false
     Description: Rotate code-server secret every 30 days.
+  AutoSetDeveloperProfile:
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+    Description: Automatically set Developer profile as default in code-server terminal sessions without requiring elevation
   CodeServerVersion:
     Type: String
     Default: "4.98.2"
@@ -86,7 +94,7 @@ Parameters:
   PrefixCode:
     Type: String
     Default: devbox
-    Description: Resource naming prefix for uniqueness and organization. Must be lowercase alphanumeric and cannot start with 'aws'
+    Description: Resource naming prefix for uniqueness and organization. Six characters or less. Must be lowercase alphanumeric and cannot start with 'aws'
   EnvironmentTag:
     Type: String
     Default: production
@@ -1343,6 +1351,18 @@ Resources:
                               git push -u origin main"
           fi
           #### END: GIT-REMOTE-S3 BOOTSTRAP ####
+
+          #### START: SET DEVELOPER PROFILE AS DEFAULT ####
+          if [ "${AutoSetDeveloperProfile}" = "true" ]; then
+            echo "INFO: Setting up AWS profile defaults..."
+            su - ec2-user -c "echo 'export AWS_PROFILE=developer' >> ~/.bashrc"
+            su - ec2-user -c "echo 'export AWS_REGION=${AWS::Region}' >> ~/.bashrc"
+            su - ec2-user -c "echo 'export AWS_ACCOUNTID=${AWS::AccountId}' >> ~/.bashrc"
+          else
+            echo "INFO: Skipping AWS profile defaults..."
+          fi
+          #### END: SET DEVELOPER PROFILE AS DEFAULT ####
+
       Tags:
         - Key: Name
           Value: !Sub ${PrefixCode}-ec2-codeserver
@@ -1514,6 +1534,9 @@ Resources:
       PolicyDocument:
         Version: 2012-10-17
         Statement:
+          - Effect: Allow
+            Action: s3:ListAllMyBuckets
+            Resource: "*"
           - Effect: Allow
             Action:
               - s3:ListBucket

@@ -47,9 +47,10 @@ This solution deploys a complete browser-based development environment with VS C
 - `CodeServerVersion` - Version of code-server to install
 - `GitHubRepo` - Public repository to clone as initial workspace. Note: Using a custom repository will not include the sample application.
 - `S3AssetBucket` - (Optional) S3 bucket containing initial workspace content. Overwrites GitHubRepo if provided
-- `S3AssetPrefix` - (Optional) Asset prefix path. Only required when S3AssetBucket is specified.
+- `S3AssetPrefix` - (Optional) Asset prefix path. Only required when S3AssetBucket is specified. Needs t end with `/`.
 - `DeployPipeline` - Enable AWS CodePipeline deployments
 - `RotateSecret` - Enable AWS Secrets Manager rotation
+- `AutoSetDeveloperProfile` - Automatically set Developer profile as default in code-server terminal sessions without requiring manual elevation
 - `InstanceType` - Supports both ARM and x86 Amazon EC2 instances
 
 ## AWS IAM Roles
@@ -63,6 +64,8 @@ The developer role has the permissions needed to deploy the sample application. 
 This separation ensures the EC2 instance runs with minimal permissions by default, while allowing controlled elevation of privileges when needed.
 
 ℹ️ **Tip**: Run `echo 'export AWS_PROFILE=developer' >> ~/.bashrc && source ~/.bashrc` to make the developer profile default for all terminal sessions.
+
+If you wish to have elevated AWS permissions automatically enabled in all new terminal sessions without requiring manual profile switching, set `AutoSetDeveloperProfile` to true. While convenient, this bypasses the security practice of explicit privilege elevation.
 
 ## Architecture
 

@@ -298,7 +298,7 @@ Resources:
                     "aws:SourceArn": !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:*"
       Tags:
         - Key: Name
-          Value: !Sub ${PrefixCode}-iampolicy-VpcFlowLogsPermissions
+          Value: !Sub ${PrefixCode}-iamrole-VpcFlowLogs
         - Key: provisioner
           Value: CFN
         - Key: solution

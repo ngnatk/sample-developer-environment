@@ -1395,6 +1395,17 @@ Resources:
               AWS: !GetAtt iamrolecodeserver.Arn
             Action: sts:AssumeRole
       Policies:
+        - PolicyName: !Sub ${PrefixCode}-iampolicy-gitpush-KMS
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:DescribeKey
+                  - kms:GenerateDataKey
+                Resource:
+                  - !GetAtt kmskey.Arn
         - PolicyName: !Sub ${PrefixCode}-iampolicy-terraform-kms-key
           PolicyDocument:
             Version: 2012-10-17

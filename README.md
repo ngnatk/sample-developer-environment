@@ -2,6 +2,8 @@
 
 This solution deploys a complete browser-based development environment with VS Code, version control, and automated deployments using a single AWS CloudFormation template.
 
+> Note: A **preview** Terraform implementation is also available in the [terraform branch](../../tree/terraform).
+
 ## Repository Structure
 
 ```

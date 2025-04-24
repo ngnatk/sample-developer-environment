@@ -70,7 +70,7 @@ Parameters:
     Description: Automatically set Developer profile as default in code-server terminal sessions without requiring elevation
   CodeServerVersion:
     Type: String
-    Default: "4.98.2"
+    Default: "4.99.3"
     Description: Version of code-server to install. See available versions at github.com/coder/code-server/releases
   InstanceArchitecture:
     Type: String

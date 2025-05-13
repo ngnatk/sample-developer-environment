@@ -695,7 +695,7 @@ Resources:
   albtargetgroupcodeserver:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      HealthCheckPath: /
+      HealthCheckPath: /login
       HealthCheckPort: 8080
       Name: !Sub ${PrefixCode}-targetgroup-codeserver
       Port: 8080

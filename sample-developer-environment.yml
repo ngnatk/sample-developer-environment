@@ -316,7 +316,7 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       KmsKeyId: !GetAtt kmskey.Arn
-      LogGroupName: !Sub /aws/events/${PrefixCode}-vpcflowlog
+      LogGroupName: !Sub /aws/vpc/${PrefixCode}-flowlogs
       RetentionInDays: 30
       Tags:
         - Key: Name
@@ -1151,7 +1151,7 @@ Resources:
   ec2loggroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub /aws/code-server/${PrefixCode}
+      LogGroupName: !Sub /aws/ec2/${PrefixCode}-codeserver
       RetentionInDays: 14
       Tags:
         - Key: Name
@@ -2005,11 +2005,11 @@ Resources:
     Type: AWS::Logs::LogGroup
     Condition: CreatePipeline
     Properties:
-      LogGroupName: !Sub /aws/events/${PrefixCode}-pipeline-trigger
+      LogGroupName: !Sub /aws/codepipeline/${PrefixCode}-pipeline
       RetentionInDays: 14
       Tags:
         - Key: Name
-          Value: !Sub ${PrefixCode}-pipeline-trigger
+          Value: !Sub ${PrefixCode}-pipelineloggroup
         - Key: provisioner
           Value: CFN
         - Key: solution

@@ -151,7 +151,7 @@ install_component "terraform_installed" \
  dnf install -y terraform" \
 "Failed to install Terraform"
 
-# Install .NET Framework (if enabled)
+# Install .NET SDK (if enabled)
 if [ "${INSTALL_DOTNET}" = "true" ]; then
     install_component "dotnet_installed" \
     "dnf install -y dotnet-sdk-${DOTNET_VERSION} && \

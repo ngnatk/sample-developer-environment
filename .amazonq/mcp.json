@@ -1,0 +1,69 @@
+{
+  "mcpServers": {
+    "awslabs.core-mcp-server": {
+      "command": "uvenv",
+      "args": [
+        "run",
+        "awslabs.core-mcp-server"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "autoApprove": [],
+      "disabled": false
+    },
+    "awslabs.aws-documentation-mcp-server": {
+      "command": "uvenv",
+      "args": [
+        "run",
+        "awslabs.aws-documentation-mcp-server"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_DOCUMENTATION_PARTITION": "aws"
+      },
+      "disabled": false,
+      "autoApprove": []
+    },
+    "awslabs.ecs-mcp-server": {
+      "command": "uvenv",
+      "args": [
+        "run",
+        "awslabs.ecs-mcp-server"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_REGION": "us-west-2"
+      },
+      "disabled": false,
+      "autoApprove": []
+    },
+    "awslabs.eks-mcp-server": {
+      "command": "uvenv",
+      "args": [
+        "run",
+        "awslabs.eks-mcp-server",
+        "--",
+        "--allow-write"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_REGION": "us-west-2"
+      },
+      "disabled": false,
+      "autoApprove": []
+    },
+    "awslabs.terraform-mcp-server": {
+      "command": "uvenv",
+      "args": [
+        "run",
+        "awslabs.terraform-mcp-server"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}

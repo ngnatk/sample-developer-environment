@@ -32,8 +32,7 @@
         "awslabs.ecs-mcp-server"
       ],
       "env": {
-        "FASTMCP_LOG_LEVEL": "ERROR",
-        "AWS_REGION": "us-west-2"
+        "FASTMCP_LOG_LEVEL": "ERROR"
       },
       "disabled": false,
       "autoApprove": []
@@ -47,8 +46,7 @@
         "--allow-write"
       ],
       "env": {
-        "FASTMCP_LOG_LEVEL": "ERROR",
-        "AWS_REGION": "us-west-2"
+        "FASTMCP_LOG_LEVEL": "ERROR"
       },
       "disabled": false,
       "autoApprove": []

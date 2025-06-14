@@ -20,6 +20,15 @@ fi
 # Status file for tracking installation progress
 STATUS_FILE="/var/lib/cloud/instance/setup-status.log"
 
+# Function to detect architecture for downloads
+detect_architecture() {
+  if [ "${INSTANCE_ARCHITECTURE}" = "arm64" ]; then
+    echo "aarch64"
+  else
+    echo "x86_64"
+  fi
+}
+
 # Function to check if a step has been completed successfully
 step_completed() {
     grep -q "^$1: \[OK\]$" $STATUS_FILE
@@ -57,6 +66,9 @@ install_component() {
         return 0
     fi
 }
+#############################
+# CORE DEVELOPER ENVIRONMENT
+#############################
 
 # Install CloudWatch agent
 install_component "cloudwatch_installed" \
@@ -86,9 +98,10 @@ install_component "code_server_installed" \
  mkdir -p /home/ec2-user/.config/code-server && \
  mkdir -p /home/ec2-user/workspace && \
  chown -R ec2-user:ec2-user /home/ec2-user/workspace && \
+ echo 'Retrieving password from Secrets Manager...' && \
  PASSWORD=\$(aws secretsmanager get-secret-value --secret-id ${SECRET_CODE_SERVER} --region ${AWS_REGION} --query SecretString --output text | jq -r .password) && \
- [[ -n \"\$PASSWORD\" ]] && \
- cat > /home/ec2-user/.config/code-server/config.yaml << 'EOF'
+ if [ -z \"\$PASSWORD\" ]; then echo 'Error: Failed to retrieve password'; exit 1; fi && \
+ cat > /home/ec2-user/.config/code-server/config.yaml << EOF
 bind-addr: 0.0.0.0:8080
 auth: password
 password: \"$PASSWORD\"
@@ -96,7 +109,7 @@ cert: false
 EOF
  && chmod 600 /home/ec2-user/.config/code-server/config.yaml && \
  chown -R ec2-user:ec2-user /home/ec2-user/.config && \
- cat > /etc/systemd/system/code-server.service << 'EOF'
+ cat > /etc/systemd/system/code-server.service << EOF
 [Unit]
 Description=code-server
 After=network.target
@@ -113,7 +126,7 @@ Restart=always
 WantedBy=multi-user.target
 EOF
  && mkdir -p /home/ec2-user/.local/share/code-server/User/ && \
- cat >> /home/ec2-user/.local/share/code-server/User/settings.json << 'EOF'
+ cat >> /home/ec2-user/.local/share/code-server/User/settings.json << EOF
 {
   \"git.enabled\": true,
   \"git.path\": \"/usr/bin/git\",
@@ -166,7 +179,7 @@ install_component "git_remote_s3_installed" \
 "dnf install git -y -q && \
  dnf install -y python3 python3-pip && \
  pip3 install boto3==${BOTO3_VERSION} && \
- pip3 install git-remote-s3 && \
+ pip3 install git-remote-s3==${GIT_REMOTE_S3_VERSION} && \
  su - ec2-user -c \"git config --global user.name 'EC2 User'\" && \
  su - ec2-user -c \"git config --global user.email 'ec2-user@example.com'\" && \
  su - ec2-user -c \"git config --global init.defaultBranch main\"" \
@@ -220,13 +233,14 @@ else
     echo "INFO: Skipping AWS profile defaults..."
 fi
 
-# Install Amazon Q CLI
-install_component "q_cli_installed" \
-"su - ec2-user -c \"curl --proto '=https' --tlsv1.2 -sSf https://desktop-release.q.us-east-1.amazonaws.com/latest/q-\$([ \\\"${INSTANCE_ARCHITECTURE}\\\" = \\\"arm64\\\" ] && echo \\\"aarch64\\\" || echo \\\"x86_64\\\")-linux.zip -o q.zip\" && \
+# Install Amazon Q CLI prerequisites (final installation requires manual IAM IDC setup)
+install_component "q_cli_prerequisites" \
+"ARCH=\$(detect_architecture) && \
+ su - ec2-user -c \"curl --proto '=https' --tlsv1.2 -sSf https://desktop-release.q.us-east-1.amazonaws.com/latest/q-\${ARCH}-linux.zip -o q.zip\" && \
  su - ec2-user -c \"unzip q.zip\" && \
- pip3 install uv && \
- uv python install ${PYTHON_VERSION} && \
- pip3 install uvenv && \
+ pip3 install uv==${UV_VERSION} && \
+ uv python install ${UV_PYTHON_VERSION} && \
+ pip3 install uvenv==${UVENV_VERSION} && \
  uvenv install --python ${MCP_PYTHON_VERSION} awslabs.terraform-mcp-server && \
  uvenv install --python ${MCP_PYTHON_VERSION} awslabs.ecs-mcp-server && \
  uvenv install --python ${MCP_PYTHON_VERSION} awslabs.eks-mcp-server && \
@@ -234,84 +248,8 @@ install_component "q_cli_installed" \
  uvenv install --python ${MCP_PYTHON_VERSION} awslabs.aws-documentation-mcp-server && \
  su - ec2-user -c \"mkdir -p ~/.amazonq/logs\" && \
  su - ec2-user -c \"ln -sf /home/ec2-user/workspace/my-workspace/.amazonq/mcp.json ~/.amazonq/mcp.json\" && \
- su - ec2-user -c \"echo 'export PATH=\\\$PATH:/home/ec2-user/q' >> ~/.bashrc\"" \
-"Failed to install or configure Amazon Q CLI"
-
-#############################
-# PROJECT-SPECIFIC COMPONENTS
-#############################
-
-# Only install project components if INSTALL_PROJECT is true
-if [ "${INSTALL_PROJECT}" = "true" ]; then
-    echo "INFO: Project components installation enabled"
-    
-    # Install MongoDB
-    install_component "mongodb_installed" \
-    "cat > /etc/yum.repos.d/mongodb-org-${MONGODB_VERSION}.repo << 'EOF'
-[mongodb-org-${MONGODB_VERSION}]
-name=MongoDB Repository
-baseurl=https://repo.mongodb.org/yum/amazon/2023/mongodb-org/${MONGODB_VERSION}/$([ \"${INSTANCE_ARCHITECTURE}\" = \"arm64\" ] && echo \"aarch64\" || echo \"x86_64\")/
-gpgcheck=1
-enabled=1
-gpgkey=https://pgp.mongodb.com/server-${MONGODB_VERSION}.asc
-EOF
-     && dnf install -y mongodb-org && systemctl start mongod && systemctl enable mongod" \
-    "Failed to install or start MongoDB"
-
-    # Install Python packages for project app
-    install_component "python_packages_installed" \
-    "pip3 install -r /home/ec2-user/workspace/my-workspace/app-ec2/requirements.txt && \
-     chown -R ec2-user:ec2-user /home/ec2-user/workspace/my-workspace" \
-    "Failed to install Python packages"
-
-    # Configure project app service
-    install_component "project_app_configured" \
-    "cat > /etc/systemd/system/project-app.service << 'EOF'
-[Unit]
-Description=Project Monitoring Application
-After=network.target mongod.service
-
-[Service]
-User=ec2-user
-Environment=\"PREFIX_CODE=${PREFIX_CODE}\" \"AWS_ACCOUNT_ID=${AWS_ACCOUNT_ID}\" \"BUCKET_NAME=${S3_BUCKET_PROJECT}\" \"AWS_REGION=${AWS_REGION}\"
-WorkingDirectory=/home/ec2-user/workspace/my-workspace/app-ec2
-ExecStart=/usr/bin/python3 app.py
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-EOF
-     && systemctl enable project-app && systemctl start project-app" \
-    "Failed to configure or start project app"
-
-    # Replace environment variables in configuration files
-    install_component "env_vars_replaced" \
-    "perl -i -pe \"BEGIN{undef $/;} \
-        s/REPLACE_AWS_ACCOUNT_ID/${AWS_ACCOUNT_ID}/g; \
-        s/REPLACE_AWS_REGION/${AWS_REGION}/g; \
-        s/REPLACE_PREFIX_CODE/${PREFIX_CODE}/g; \
-        s/REPLACE_VPC_ID/${VPC_ID}/g; \
-        s/REPLACE_PRIVATE_SUBNET_1/${PRIVATE_SUBNET_1}/g; \
-        s/REPLACE_PRIVATE_SUBNET_2/${PRIVATE_SUBNET_2}/g; \
-        s/REPLACE_PUBLIC_SUBNET_1/${PUBLIC_SUBNET_1}/g; \
-        s/REPLACE_PUBLIC_SUBNET_2/${PUBLIC_SUBNET_2}/g; \
-        s/REPLACE_SECURITY_GROUP_APP/${SECURITY_GROUP_APP}/g; \
-        s/REPLACE_SECURITY_GROUP_ALB/${SECURITY_GROUP_ALB}/g; \
-        \$(find /home/ec2-user/workspace/my-workspace \
-            -name \"task_definition_*.json\" -o \
-            -name \"fast-forward.sh\")\" && \
-     su - ec2-user -c \"cd /home/ec2-user/workspace/my-workspace && git add . && git commit -m 'Update env' && git push origin main\"" \
-    "Failed to replace environment variables or commit changes"
-
-    # Install k6
-    install_component "k6_installed" \
-    "curl -sLO \"https://github.com/grafana/k6/releases/download/v${K6_VERSION}/k6-v${K6_VERSION}-linux-${INSTANCE_ARCHITECTURE}.tar.gz\" && \
-     tar -xzf k6-v${K6_VERSION}-linux-${INSTANCE_ARCHITECTURE}.tar.gz -C /tmp && \
-     install -o root -g root -m 0755 /tmp/k6-v${K6_VERSION}-linux-${INSTANCE_ARCHITECTURE}/k6 /usr/local/bin/k6" \
-    "Failed to install k6"
-else
-    echo "INFO: Project components installation disabled, skipping"
-fi
+ echo 'NOTE: To complete Q CLI setup, see README for IAM IDC instructions'" \
+"Failed to set up Amazon Q CLI prerequisites"
 
 # Print summary of installation
 echo "INFO: Setup script completed at $(date)"

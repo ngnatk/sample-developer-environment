@@ -98,7 +98,7 @@ Here are some handy files you'll find on the EC2 instance:
 4. Start with `q chat`
 5. Use `/model` to select AI model, `/tools` to see available MCP tools
 6. Browse [AWS Labs MCP](https://github.com/awslabs/mcp) for additional MCP servers
-7. Add more tools by editing `/home/ec2-user/workspace/my-workspace/.amazonq.mcp.json`
+7. Add more tools by editing `/home/ec2-user/workspace/my-workspace/.amazonq/mcp.json`
 8. Use Amazon Q CLI to accelerate your development 🚀
 
 ## AWS IAM Roles

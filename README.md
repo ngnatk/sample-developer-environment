@@ -2,21 +2,21 @@
 
 This solution deploys a complete browser-based development environment with VS Code, version control, and automated deployments using a single AWS CloudFormation template.
 
->>> 🚀 Now includes [Amazon Q CLI](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/command-line.html) preconfiguration!
+> 🚀 Now includes [Amazon Q CLI](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/command-line.html) preconfiguration!
 
 > A **preview** Terraform implementation is also available in the [terraform branch](../../tree/terraform). This has not been updated to the latest version yet.
 
 ## Quick Navigation
-- [Repository Structure](##repository-structure)
-- [Key Features](##key-features)
-- [Quick Start](##quick-start)
-- [Configuration Options](##configuration-options)
-- [Useful File locations](##useful-file-locations)
-- [Amazon Q CLI Setup](##amazon-q-cli-setup)
-- [AWS IAM Roles](##aws-iam-roles)
-- [Architecture](##architecture)
-- [Sample Application](##sample-application)
-- [Security Considerations](##security-considerations)
+- [Repository Structure](#repository-structure)
+- [Key Features](#key-features)
+- [Quick Start](#quick-start)
+- [Configuration Options](#configuration-options)
+- [Useful File locations](#useful-file-locations)
+- [Amazon Q CLI Setup](#amazon-q-cli-setup)
+- [AWS IAM Roles](#aws-iam-roles)
+- [Architecture](#architecture)
+- [Sample Application](#sample-application)
+- [Security Considerations](#security-considerations)
 
 ## Repository Structure
 

@@ -90,7 +90,7 @@ Here are some handy files you'll find on the EC2 instance:
 ## Amazon Q CLI Setup
 
 1. Follow the [Amazon Q Developer Getting Started guide](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/getting-started.html) - choose Free/Pro tier and authentication method
-2. Run `./install.sh` and follow prompts
+2. Run `install.sh` and follow prompts
 
     ![Amazon Q Setup](img/qsetup.png)
 

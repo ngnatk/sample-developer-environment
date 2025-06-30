@@ -1302,7 +1302,7 @@ Resources:
           echo "=================================================================="
           echo "FAILSAFE COMMAND:"
           echo "To manually download and run the latest setup script, execute:"
-          echo "sudo bash -c 'curl -s https://raw.githubusercontent.com/aws-samples/sample-developer-environment/refs/heads/workshop/devbox-setup.sh -o /tmp/setup.sh && chmod +x /tmp/setup.sh && source /etc/devbox-env.sh && /tmp/setup.sh'"
+          echo "sudo bash -c 'curl -s https://raw.githubusercontent.com/aws-samples/sample-developer-environment/refs/heads/main/devbox-setup.sh -o /tmp/setup.sh && chmod +x /tmp/setup.sh && source /etc/devbox-env.sh && /tmp/setup.sh'"
           echo "=================================================================="
           echo ""
 

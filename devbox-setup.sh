@@ -324,8 +324,6 @@ uvenv install --python ${MCP_PYTHON_VERSION} awslabs.ecs-mcp-server
 uvenv install --python ${MCP_PYTHON_VERSION} awslabs.eks-mcp-server
 uvenv install --python ${MCP_PYTHON_VERSION} awslabs.core-mcp-server
 uvenv install --python ${MCP_PYTHON_VERSION} awslabs.aws-documentation-mcp-server
-su - ec2-user -c "mkdir -p ~/.amazonq/logs"
-su - ec2-user -c "ln -sf /home/********/workspace/my-workspace/.amazonq/mcp.json ~/.amazonq/mcp.json"
 echo "NOTE: To complete Q CLI setup, see README instructions"
 ' "Failed to set up Amazon Q CLI prerequisites"
 

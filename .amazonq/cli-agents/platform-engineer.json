@@ -1,4 +1,11 @@
 {
+  "name": "platform-engineer",
+  "description": "Platform engineering agent with container orchestration, infrastructure as code, and AWS services",
+  "tools": ["*"],
+  "allowedTools": ["fs_read"],
+  "resources": [
+    "file://README.md"
+  ],
   "mcpServers": {
     "awslabs.core-mcp-server": {
       "command": "uvenv",
@@ -10,9 +17,7 @@
       ],
       "env": {
         "FASTMCP_LOG_LEVEL": "ERROR"
-      },
-      "autoApprove": [],
-      "disabled": false
+      }
     },
     "awslabs.aws-documentation-mcp-server": {
       "command": "uvenv",
@@ -25,9 +30,7 @@
       "env": {
         "FASTMCP_LOG_LEVEL": "ERROR",
         "AWS_DOCUMENTATION_PARTITION": "aws"
-      },
-      "disabled": false,
-      "autoApprove": []
+      }
     },
     "awslabs.ecs-mcp-server": {
       "command": "uvenv",
@@ -39,9 +42,7 @@
       ],
       "env": {
         "FASTMCP_LOG_LEVEL": "ERROR"
-      },
-      "disabled": false,
-      "autoApprove": []
+      }
     },
     "awslabs.eks-mcp-server": {
       "command": "uvenv",
@@ -55,20 +56,19 @@
       ],
       "env": {
         "FASTMCP_LOG_LEVEL": "ERROR"
-      },
-      "disabled": false,
-      "autoApprove": []
+      }
     },
-    "hashicorp.terraform-mcp-server": {
-      "command": "docker",
+    "awslabs.terraform-mcp-server": {
+      "command": "uvenv",
       "args": [
         "run",
-        "-i",
-        "--rm",
-        "hashicorp/terraform-mcp-server"
+        "--python",
+        "3.13",
+        "awslabs.terraform-mcp-server"
       ],
-      "disabled": false,
-      "autoApprove": []
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      }
     }
   }
 }

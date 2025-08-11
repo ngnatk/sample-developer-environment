@@ -22,8 +22,10 @@ This solution deploys a complete browser-based development environment with VS C
 
 ```
 .
-├── .amazonq/                         # MCP workspace configuration directory
-│   └── mcp.json                      # MCP Server configuration file
+├── .amazonq/                         # Amazon Q CLI workspace configuration directory
+│   └── cli-agents/                   # Agent configuration directory
+│       └── platform-engineer.json    # Platform engineering agent with MCP servers
+│       └── data-engineer.json        # Data engineering agent with MCP servers
 ├── dev/                              # Development workspace
 │   └── README.md                     # Development guide
 ├── release/                          # Sample Terraform application
@@ -95,11 +97,12 @@ Here are some handy files you'll find on the EC2 instance:
     ![Amazon Q Setup](img/qsetup.png)
 
 3. Navigate to workspace: `cd /home/ec2-user/workspace/my-workspace`
-4. Start with `q chat`
-5. Use `/model` to select AI model, `/tools` to see available MCP tools
-6. Browse [AWS Labs MCP](https://github.com/awslabs/mcp) for additional MCP servers
-7. Add more tools by editing `/home/ec2-user/workspace/my-workspace/.amazonq/mcp.json`
-8. Use Amazon Q CLI to accelerate your development 🚀
+4. (optional) Set the default agent: `q settings chat.defaultAgent platform-engineer`
+5. Start with `q chat` or `q chat --agent platform-engineer`
+6. Use `/model` to select AI model, `/tools` to see available MCP tools
+7. Browse [AWS Labs MCP](https://github.com/awslabs/mcp) for additional MCP servers
+8. Create additional agents by adding new files to `.amazonq/cli-agents/`
+9. Use Amazon Q CLI to accelerate your development 🚀
 
 ## AWS IAM Roles
 

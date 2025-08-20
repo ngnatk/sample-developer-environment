@@ -327,6 +327,16 @@ uvenv install --python ${MCP_PYTHON_VERSION} awslabs.aws-documentation-mcp-serve
 echo "NOTE: To complete Q CLI setup, see README instructions"
 ' "Failed to set up Amazon Q CLI prerequisites"
 
+# Install Session Manager plugin for ECS Exec
+install_component "session_manager_plugin_installed" '
+ARCH=$(detect_architecture)
+if [ "$ARCH" = "aarch64" ]; then
+    dnf install -y https://s3.amazonaws.com/session-manager-downloads/plugin/latest/linux_arm64/session-manager-plugin.rpm
+else
+    dnf install -y https://s3.amazonaws.com/session-manager-downloads/plugin/latest/linux_64bit/session-manager-plugin.rpm
+fi
+' "Failed to install Session Manager plugin"
+
 # Print summary of installation
 echo "INFO: Setup script completed at $(date)"
 echo "INFO: Installation summary:"
